@@ -1,0 +1,295 @@
+/* ========================================
+   Rest Timer Overlay
+   ======================================== */
+
+.timer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(30, 26, 22, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 150;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xl);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-normal) var(--ease-out);
+}
+
+.timer-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.timer-ring {
+    position: relative;
+    width: 240px;
+    height: 240px;
+}
+
+.timer-ring svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.timer-ring__bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.1);
+    stroke-width: 6;
+}
+
+.timer-ring__progress {
+    fill: none;
+    stroke: var(--color-terracotta);
+    stroke-width: 6;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s linear;
+}
+
+.timer-ring__progress.warning {
+    stroke: var(--color-warning);
+}
+
+.timer-ring__progress.done {
+    stroke: var(--color-olive);
+}
+
+.timer-display {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.timer-display__time {
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: white;
+    line-height: 1;
+    letter-spacing: 0.02em;
+}
+
+.timer-display__label {
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: var(--space-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.timer-controls {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+}
+
+.timer-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-full);
+    color: white;
+    transition: all var(--duration-fast) var(--ease-out);
+}
+
+.timer-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.timer-btn:active {
+    transform: scale(0.95);
+}
+
+.timer-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+.timer-btn--primary {
+    width: 64px;
+    height: 64px;
+    background: var(--color-terracotta);
+}
+
+.timer-btn--primary:hover {
+    background: var(--color-terracotta-dk);
+}
+
+.timer-btn--primary svg {
+    width: 28px;
+    height: 28px;
+}
+
+.timer-skip {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: var(--space-sm) var(--space-md);
+    transition: color var(--duration-fast) var(--ease-out);
+}
+
+.timer-skip:hover {
+    color: white;
+}
+
+.timer-plus {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-full);
+    transition: all var(--duration-fast) var(--ease-out);
+}
+
+.timer-plus:hover {
+    color: white;
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* --- History Page --- */
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.history-item {
+    cursor: pointer;
+}
+
+.history-item__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.history-item__date {
+    font-weight: 600;
+    font-size: 0.9375rem;
+}
+
+.history-item__mood {
+    font-size: 1.25rem;
+}
+
+.history-item__meta {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-xs);
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+}
+
+.history-item__detail {
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-border);
+    display: none;
+}
+
+.history-item.expanded .history-item__detail {
+    display: block;
+}
+
+.history-exercise {
+    margin-bottom: var(--space-md);
+}
+
+.history-exercise__name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: var(--space-xs);
+}
+
+.history-exercise__sets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+}
+
+.history-set {
+    padding: 4px 8px;
+    background: var(--color-cream);
+    border-radius: var(--radius-xs);
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: var(--font-mono);
+}
+
+.history-set.completed {
+    background: var(--color-olive-bg);
+    color: var(--color-olive);
+}
+
+/* --- Settings Page --- */
+.settings-section {
+    margin-bottom: var(--space-xl);
+}
+
+.settings-section__title {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.settings-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) 0;
+}
+
+.settings-item__label {
+    font-size: 0.9375rem;
+}
+
+.settings-item__desc {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+}
+
+/* Toggle switch */
+.toggle {
+    position: relative;
+    width: 48px;
+    height: 28px;
+    background: var(--color-warm-gray-lt);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-out);
+}
+
+.toggle.active {
+    background: var(--color-terracotta);
+}
+
+.toggle__knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    background: white;
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.toggle.active .toggle__knob {
+    transform: translateX(20px);
+}

@@ -1,0 +1,108 @@
+/* ========================================
+   Design Tokens - Warm & Earthy
+   ======================================== */
+
+:root {
+    /* Surface */
+    --color-cream:          #F5F0E8;
+    --color-cream-dark:     #EDE6D8;
+    --color-warm-white:     #FDFBF7;
+    --color-warm-gray:      #A89F94;
+    --color-warm-gray-lt:   #D4CCC2;
+    --color-warm-gray-dk:   #8A7F73;
+
+    /* Primary */
+    --color-terracotta:     #C75B39;
+    --color-terracotta-dk:  #A84828;
+    --color-terracotta-lt:  #E8845F;
+    --color-terracotta-bg:  #FDF0EB;
+
+    /* Accent */
+    --color-brown:          #3D2B1F;
+    --color-brown-md:       #5C4033;
+    --color-olive:          #6B7B3A;
+    --color-olive-dk:       #4F5C2A;
+    --color-olive-lt:       #8FA04E;
+    --color-olive-bg:       #F2F5E8;
+
+    /* Semantic */
+    --color-success:        #6B7B3A;
+    --color-warning:        #D4A843;
+    --color-danger:         #C75B39;
+
+    /* Text */
+    --color-text:           #3D2B1F;
+    --color-text-muted:     #7A6B5D;
+    --color-text-faint:     #A89F94;
+    --color-text-inverse:   #F5F0E8;
+
+    /* Backgrounds */
+    --color-bg:             var(--color-cream);
+    --color-bg-card:        var(--color-warm-white);
+    --color-bg-elevated:    #FFFFFF;
+    --color-border:         var(--color-cream-dark);
+    --color-border-focus:   var(--color-terracotta);
+
+    /* Shadows */
+    --shadow-sm:            0 1px 3px rgba(61,43,31,0.06);
+    --shadow-md:            0 4px 12px rgba(61,43,31,0.08);
+    --shadow-lg:            0 8px 24px rgba(61,43,31,0.10);
+    --shadow-inset:         inset 0 1px 3px rgba(61,43,31,0.06);
+
+    /* Spacing (4px base) */
+    --space-xs:             4px;
+    --space-sm:             8px;
+    --space-md:             16px;
+    --space-lg:             24px;
+    --space-xl:             32px;
+    --space-2xl:            48px;
+    --space-3xl:            64px;
+
+    /* Radii */
+    --radius-xs:            4px;
+    --radius-sm:            6px;
+    --radius-md:            10px;
+    --radius-lg:            16px;
+    --radius-xl:            24px;
+    --radius-full:          9999px;
+
+    /* Typography */
+    --font-heading:         'Playfair Display', Georgia, 'Times New Roman', serif;
+    --font-body:            'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+    --font-mono:            'JetBrains Mono', 'Fira Code', monospace;
+
+    /* Transitions */
+    --ease-out:             cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-bounce:          cubic-bezier(0.34, 1.56, 0.64, 1);
+    --duration-fast:        150ms;
+    --duration-normal:      250ms;
+    --duration-slow:        400ms;
+}
+
+/* Dark Mode Tokens */
+[data-theme="dark"] {
+    --color-cream:          #1E1A16;
+    --color-cream-dark:     #2A2420;
+    --color-warm-white:     #252019;
+    --color-warm-gray:      #6B5F54;
+    --color-warm-gray-lt:   #3D352D;
+    --color-warm-gray-dk:   #8A7F73;
+
+    --color-terracotta-bg:  #3A241C;
+    --color-olive-bg:       #2A2E1E;
+
+    --color-text:           #E8DFD3;
+    --color-text-muted:     #9A8B7A;
+    --color-text-faint:     #6B5F54;
+    --color-text-inverse:   #1E1A16;
+
+    --color-bg:             #1E1A16;
+    --color-bg-card:        #252019;
+    --color-bg-elevated:    #2A2420;
+    --color-border:         #3D352D;
+
+    --shadow-sm:            0 1px 3px rgba(0,0,0,0.15);
+    --shadow-md:            0 4px 12px rgba(0,0,0,0.20);
+    --shadow-lg:            0 8px 24px rgba(0,0,0,0.25);
+    --shadow-inset:         inset 0 1px 3px rgba(0,0,0,0.15);
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Progress - Calisthenics Tracker</title>
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/progress.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body data-page="progress">
+
+    <main class="page">
+        <div class="page-header">
+            <h1>Progress</h1>
+            <p>Lihat perjalanan dan perkembangan kamu</p>
+        </div>
+
+        <div id="progress-container">
+            <!-- Progression Tree -->
+            <div class="section">
+                <div class="section__header">
+                    <span class="section__title">Progression Tree</span>
+                </div>
+                <div id="progression-tree"></div>
+            </div>
+
+            <!-- Body Stats -->
+            <div class="section">
+                <div class="section__header">
+                    <span class="section__title">Berat Badan</span>
+                </div>
+                <div id="body-stats-section"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav"></nav>
+
+    <!-- Toast -->
+    <div class="toast"></div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

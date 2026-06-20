@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Calisthenics Tracker</title>
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body data-page="dashboard">
+
+    <!-- Auth Screen -->
+    <div id="auth-container" class="auth-page" style="display:none">
+        <div class="auth-card">
+            <h1 id="auth-title">Selamat Datang Kembali</h1>
+            <p class="subtitle" id="auth-subtitle">Masuk untuk lanjut latihan</p>
+
+            <form class="auth-form" id="auth-form">
+                <div class="input-group" id="name-field" style="display:none">
+                    <label>Nama</label>
+                    <input type="text" class="input" id="auth-name" placeholder="Nama kamu" autocomplete="name">
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" class="input" id="auth-email" placeholder="email@contoh.com" required autocomplete="email">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" class="input" id="auth-password" placeholder="Minimal 6 karakter" required minlength="6" autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn--primary btn--full btn--lg" id="auth-submit">Masuk</button>
+            </form>
+
+            <div class="auth-toggle">
+                <span id="auth-toggle-text">Belum punya akun? </span>
+                <a id="auth-toggle-link">Daftar</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- App -->
+    <div id="app-container" style="display:none">
+        <main class="page">
+            <div id="dashboard-container"></div>
+        </main>
+
+        <nav class="bottom-nav"></nav>
+    </div>
+
+    <!-- Onboarding Modal -->
+    <div class="overlay" id="onboarding-modal">
+        <div class="modal">
+            <div class="modal__header">
+                <h3 class="modal__title">Data Diri</h3>
+            </div>
+            <p class="text-muted mb-lg">Isi data dasar kamu untuk mulai tracking</p>
+            <form id="onboarding-form" class="flex-col gap-md">
+                <div class="input-group">
+                    <label>Tinggi Badan (cm)</label>
+                    <input type="number" class="input" id="onboard-height" placeholder="172" min="100" max="250" required inputmode="numeric">
+                </div>
+                <div class="input-group">
+                    <label>Berat Badan (kg)</label>
+                    <input type="number" class="input" id="onboard-weight" placeholder="45" min="20" max="200" step="0.1" required inputmode="decimal">
+                </div>
+                <button type="submit" class="btn btn--primary btn--full mt-md">Mulai</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast"></div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

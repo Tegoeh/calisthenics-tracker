@@ -1,0 +1,194 @@
+/* ========================================
+   Dashboard Page Styles
+   ======================================== */
+
+/* --- Greeting --- */
+.greeting {
+    padding: var(--space-md) 0 var(--space-lg);
+}
+
+.greeting__time {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-xs);
+}
+
+.greeting__name {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+/* --- Streak Card --- */
+.streak-card {
+    background: linear-gradient(135deg, var(--color-brown) 0%, var(--color-brown-md) 100%);
+    color: var(--color-text-inverse);
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    padding: var(--space-lg);
+}
+
+.streak-card__icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(255,255,255,0.15);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.streak-card__icon svg {
+    width: 28px;
+    height: 28px;
+    stroke: var(--color-terracotta-lt);
+    fill: var(--color-terracotta-lt);
+}
+
+.streak-card__info {
+    flex: 1;
+}
+
+.streak-card__number {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: var(--space-xs);
+}
+
+.streak-card__label {
+    font-size: 0.875rem;
+    opacity: 0.7;
+}
+
+.streak-card__best {
+    font-size: 0.75rem;
+    opacity: 0.5;
+    margin-top: var(--space-xs);
+}
+
+/* --- Today's Workout Card --- */
+.today-card {
+    border: 2px solid var(--color-terracotta);
+    background: var(--color-terracotta-bg);
+}
+
+.today-card__status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.today-card__icon {
+    width: 48px;
+    height: 48px;
+    background: var(--color-terracotta);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.today-card__icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: white;
+    fill: none;
+}
+
+.today-card__text h3 {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.today-card__text p {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+}
+
+/* --- Level Cards --- */
+.level-card {
+    padding: var(--space-md);
+}
+
+.level-card__category {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.level-card__exercise {
+    font-family: var(--font-heading);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+}
+
+.level-card__target {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+/* --- Quick Stats --- */
+.quick-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-sm);
+}
+
+.quick-stat {
+    text-align: center;
+    padding: var(--space-md);
+}
+
+.quick-stat__number {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1;
+    margin-bottom: var(--space-xs);
+}
+
+.quick-stat__label {
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* --- Tip Card --- */
+.tip-card {
+    background: var(--color-olive-bg);
+    border-color: var(--color-olive);
+    border-width: 1px;
+}
+
+.tip-card__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+    color: var(--color-olive);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.tip-card__header svg {
+    width: 18px;
+    height: 18px;
+}
+
+.tip-card p {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+}
