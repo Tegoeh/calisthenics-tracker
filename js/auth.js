@@ -237,11 +237,9 @@ async function handleAuthSubmit(e) {
 
         if (rpcData && rpcData.success) {
             const user = rpcData.user;
-            state.user = { id: user.id };
             localStorage.setItem('cal_user', JSON.stringify(user));
-
-            await loadProfile();
-            showApp();
+            window.location.reload();
+            return;
         } else if (rpcData && !rpcData.success) {
             showToast(rpcData.error || 'Terjadi kesalahan');
             resetBtn();
