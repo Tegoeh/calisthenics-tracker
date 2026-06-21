@@ -3,6 +3,9 @@
 -- Run this in Supabase SQL Editor
 -- ========================================
 
+-- Enable pgcrypto for gen_random_uuid()
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- 1. Profiles (extends Supabase auth.users)
 CREATE TABLE profiles (
     id          UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
@@ -134,6 +137,7 @@ CREATE POLICY "Users can update own progression" ON user_progression FOR UPDATE 
 CREATE POLICY "Users can view own sessions" ON workout_sessions FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own sessions" ON workout_sessions FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own sessions" ON workout_sessions FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own sessions" ON workout_sessions FOR DELETE USING (auth.uid() = user_id);
 
 -- Workout exercises
 CREATE POLICY "Users can view own exercises" ON workout_exercises FOR SELECT USING (

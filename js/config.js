@@ -1,6 +1,5 @@
 // ========================================
 // Config - Supabase credentials
-// Copy this file to config.js and fill in your values
 // ========================================
 
 export const SUPABASE_URL = 'https://yepxmfftovzebuaojhol.supabase.co';

@@ -278,7 +278,7 @@ function bindSettingsEvents() {
     const logoutBtn = $('#logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
-            localStorage.removeItem('cal_user');
+            await supabase.auth.signOut();
             window.location.href = 'index.html';
         });
     }

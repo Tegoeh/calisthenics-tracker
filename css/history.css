@@ -1,0 +1,118 @@
+/* ========================================
+   History Page Styles
+   ======================================== */
+
+/* --- History List --- */
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+/* --- History Item --- */
+.history-item {
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+}
+
+.history-item:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.history-item__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-sm);
+}
+
+.history-item__date {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.history-item__mood {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.history-item__meta {
+    display: flex;
+    gap: var(--space-md);
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-sm);
+}
+
+.history-item__meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.history-item__meta span:not(:last-child)::after {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: var(--radius-full);
+    background: var(--color-warm-gray-lt);
+    margin-left: var(--space-md);
+}
+
+/* --- Expanded Detail --- */
+.history-item__detail {
+    display: none;
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-border);
+}
+
+.history-item.expanded .history-item__detail {
+    display: block;
+}
+
+.history-item.expanded {
+    border-color: var(--color-terracotta-bg);
+}
+
+/* --- History Exercise --- */
+.history-exercise {
+    margin-bottom: var(--space-md);
+}
+
+.history-exercise:last-child {
+    margin-bottom: 0;
+}
+
+.history-exercise__name {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: var(--space-sm);
+}
+
+.history-exercise__sets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    padding-left: calc(var(--space-sm) + 44px);
+}
+
+.history-set {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: var(--radius-xs);
+    background: var(--color-cream);
+    color: var(--color-text-muted);
+    font-weight: 500;
+    font-family: var(--font-mono);
+}
+
+.history-set.completed {
+    background: var(--color-olive-bg);
+    color: var(--color-olive);
+}

@@ -1,7 +1,8 @@
 import { supabase, state, isConfigured } from './app.js';
+import { showToast } from './utils.js';
 
 // ========================================
-// Auth Module - Custom auth via app_users table
+// Auth Module - Supabase Auth
 // ========================================
 
 const authContainer = document.getElementById('auth-container');
@@ -15,27 +16,14 @@ export async function initAuth() {
         return;
     }
 
-    const saved = localStorage.getItem('cal_user');
-    if (saved) {
-        try {
-            const user = JSON.parse(saved);
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', user.id)
-                .single();
+    const { data: { session } } = await supabase.auth.getSession();
 
-            if (profile) {
-                state.user = { id: user.id };
-                state.profile = profile;
-                await loadProgressionData();
-                showApp();
-                bindAuthEvents();
-                return;
-            }
-        } catch (e) {
-            localStorage.removeItem('cal_user');
-        }
+    if (session?.user) {
+        state.user = { id: session.user.id };
+        await loadProfile();
+        showApp();
+        bindAuthEvents();
+        return;
     }
 
     showAuth();
@@ -211,41 +199,46 @@ async function handleAuthSubmit(e) {
     };
 
     try {
-        let result;
         if (isLoginMode) {
-            result = await supabase.rpc('app_login', {
-                p_email: email,
-                p_password: password
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password
             });
+
+            if (error) {
+                showToast(error.message === 'Invalid login credentials'
+                    ? 'Email atau password salah'
+                    : error.message);
+                resetBtn();
+                return;
+            }
+
+            state.user = { id: data.user.id };
+            await loadProfile();
+            showApp();
         } else {
-            result = await supabase.rpc('app_signup', {
-                p_email: email,
-                p_password: password,
-                p_username: name || email.split('@')[0]
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: { username: name || email.split('@')[0] }
+                }
             });
-        }
 
-        const rpcData = result.data;
-        const rpcError = result.error;
+            if (error) {
+                showToast(error.message);
+                resetBtn();
+                return;
+            }
 
-        if (rpcError) {
-            console.log('RPC error:', rpcError.message);
-            showToast(rpcError.message);
-            resetBtn();
-            return;
-        }
-
-        if (rpcData && rpcData.success) {
-            const user = rpcData.user;
-            localStorage.setItem('cal_user', JSON.stringify(user));
-            window.location.reload();
-            return;
-        } else if (rpcData && !rpcData.success) {
-            showToast(rpcData.error || 'Terjadi kesalahan');
-            resetBtn();
-        } else {
-            showToast('Respon tidak valid dari server');
-            resetBtn();
+            if (data.session) {
+                state.user = { id: data.user.id };
+                await loadProfile();
+                showApp();
+            } else {
+                showToast('Cek email kamu untuk verifikasi akun');
+                resetBtn();
+            }
         }
     } catch (err) {
         console.error('Auth exception:', err);

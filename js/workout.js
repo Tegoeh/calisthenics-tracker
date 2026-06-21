@@ -1,7 +1,7 @@
 import { state } from './app.js';
 import * as db from './db.js';
 import { getCurrentExercise, getExercisesForCategory, getExerciseForLevel } from './progression.js';
-import { showToast, $, $$, iconCheck, iconPlus, CATEGORY_LABELS, formatDuration, iconFlame } from './utils.js';
+import { showToast, $, $$, iconCheck, iconPlus, CATEGORY_LABELS, formatDuration } from './utils.js';
 import { startTimer } from './timer.js';
 
 // ========================================
@@ -233,7 +233,10 @@ function renderExercises() {
                         <span class="tag tag--${ex.category}">${CATEGORY_LABELS[ex.category]}</span>
                         <div class="exercise-block__name">${prog?.exercise_name || 'Exercise'}</div>
                     </div>
-                    <span class="badge badge--terracotta">${targetLabel}</span>
+                    <div class="exercise-block__actions">
+                        <span class="exercise-block__change" data-category="${ex.category}" data-exercise-id="${ex.id}">Ganti</span>
+                        <span class="badge badge--terracotta">${targetLabel}</span>
+                    </div>
                 </div>
                 ${prog?.description ? `<div class="exercise-block__desc">${prog.description}</div>` : ''}
                 <div class="set-list" data-exercise-entry="${ex.id}">
@@ -256,11 +259,23 @@ function renderExercises() {
                         </div>
                     `}).join('')}
                 </div>
+                <div class="set-controls">
+                    <button class="set-control-btn set-control-btn--add" data-exercise-id="${ex.id}" data-action="add">
+                        ${iconPlus()} Set
+                    </button>
+                    ${(ex.sets || []).length > 1 ? `
+                    <button class="set-control-btn set-control-btn--remove" data-exercise-id="${ex.id}" data-action="remove">
+                        - Set
+                    </button>
+                    ` : ''}
+                </div>
             </div>
         `;
     }).join('');
 
     bindSetEvents();
+    bindExerciseChangeEvents();
+    bindSetControlEvents();
 }
 
 function bindWorkoutEvents() {
@@ -453,6 +468,126 @@ function showExercisePicker() {
             const cat = item.dataset.category;
             const exercise = state.progressionLevels.find(e => e.id === exId);
 
+            if (!exercise) return;
+
+            const existing = sessionExercises.find(e => e.category === cat);
+            if (existing) {
+                await db.removeExercise(existing.id);
+                sessionExercises = sessionExercises.filter(e => e.category !== cat);
+            }
+
+            const { data: exData } = await db.addExerciseToSession(
+                state.currentSession.id, exercise.id, cat, sessionExercises.length
+            );
+
+            if (exData) {
+                const targetMatches = exercise.target_reps?.match(/(\d+)/g);
+                const targetVal = targetMatches?.length >= 2 ? parseInt(targetMatches[1]) : (targetMatches ? parseInt(targetMatches[0]) : 0);
+                const sets = [];
+                for (let s = 1; s <= 3; s++) {
+                    const { data: setData } = await db.addSet(
+                        exData.id, s,
+                        exercise.is_hold ? null : targetVal,
+                        exercise.is_hold ? targetVal : null
+                    );
+                    if (setData) sets.push(setData);
+                }
+                exData.sets = sets;
+                sessionExercises.push(exData);
+            }
+
+            renderExercises();
+            overlay.classList.remove('active');
+        });
+    });
+}
+
+function bindExerciseChangeEvents() {
+    $$('.exercise-block__change').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const cat = btn.dataset.category;
+            showExercisePickerForCategory(cat);
+        });
+    });
+}
+
+function bindSetControlEvents() {
+    $$('.set-control-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const exId = btn.dataset.exerciseId;
+            const action = btn.dataset.action;
+            const ex = sessionExercises.find(e => e.id === exId);
+            if (!ex) return;
+
+            if (action === 'add') {
+                const prog = ex.progression_levels;
+                const isHold = prog?.is_hold;
+                const targetVal = parseTargetValue(prog?.target_reps);
+                const nextSetNum = (ex.sets || []).length + 1;
+
+                const { data: setData } = await db.addSet(
+                    exId, nextSetNum,
+                    isHold ? null : targetVal,
+                    isHold ? targetVal : null
+                );
+
+                if (setData) {
+                    if (!ex.sets) ex.sets = [];
+                    ex.sets.push(setData);
+                    renderExercises();
+                }
+            } else if (action === 'remove') {
+                if (!ex.sets || ex.sets.length <= 1) return;
+
+                const lastSet = ex.sets[ex.sets.length - 1];
+                const { error } = await db.removeSet(lastSet.id);
+
+                if (!error) {
+                    ex.sets.pop();
+                    renderExercises();
+                } else {
+                    showToast('Gagal menghapus set');
+                }
+            }
+        });
+    });
+}
+
+function showExercisePickerForCategory(targetCategory) {
+    const overlay = $('#exercise-picker-overlay');
+    if (!overlay) return;
+
+    const cat = targetCategory;
+    const exercises = getExercisesForCategory(cat);
+    const currentEx = sessionExercises.find(e => e.category === cat);
+
+    let html = `<div class="modal"><div class="modal__header"><h3>Ganti ${CATEGORY_LABELS[cat]}</h3><button class="btn btn--ghost btn--sm" id="close-picker">Tutup</button></div>`;
+    html += '<div class="exercise-picker">';
+
+    exercises.forEach(ex => {
+        const isActive = currentEx?.exercise_id === ex.id;
+        html += `
+            <div class="exercise-picker__item ${isActive ? 'current' : ''}" data-exercise-id="${ex.id}" data-category="${cat}">
+                <div>
+                    <div class="exercise-picker__name">${ex.exercise_name}</div>
+                    <div class="exercise-picker__level">Level ${ex.level} &middot; ${ex.target_reps}</div>
+                    ${ex.description ? `<div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:2px">${ex.description}</div>` : ''}
+                </div>
+                ${isActive ? '<span class="badge badge--terracotta">Aktif</span>' : ''}
+            </div>
+        `;
+    });
+
+    html += '</div></div>';
+    overlay.innerHTML = html;
+    overlay.classList.add('active');
+
+    $('#close-picker').addEventListener('click', () => overlay.classList.remove('active'));
+
+    $$('.exercise-picker__item').forEach(item => {
+        item.addEventListener('click', async () => {
+            const exId = parseInt(item.dataset.exerciseId);
+            const exercise = state.progressionLevels.find(e => e.id === exId);
             if (!exercise) return;
 
             const existing = sessionExercises.find(e => e.category === cat);
