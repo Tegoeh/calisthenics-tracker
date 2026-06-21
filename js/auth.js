@@ -208,30 +208,44 @@ async function handleAuthSubmit(e) {
     btn.disabled = true;
     btn.textContent = 'Memproses...';
 
+    const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms));
+    const resetBtn = () => {
+        btn.disabled = false;
+        btn.textContent = isLoginMode ? 'Masuk' : 'Daftar';
+    };
+
     try {
         let result;
         if (isLoginMode) {
-            result = await supabase.auth.signInWithPassword({ email, password });
+            result = await Promise.race([
+                supabase.auth.signInWithPassword({ email, password }),
+                timeout(10000)
+            ]);
         } else {
-            result = await supabase.auth.signUp({
-                email, password,
-                options: { data: { username: name || email.split('@')[0] } }
-            });
+            result = await Promise.race([
+                supabase.auth.signUp({
+                    email, password,
+                    options: { data: { username: name || email.split('@')[0] } }
+                }),
+                timeout(10000)
+            ]);
         }
 
         if (result.error) {
             const msg = result.error.message;
+            console.log('Auth error:', msg);
             if (msg.includes('Invalid login credentials')) {
                 showToast('Email atau password salah');
             } else if (msg.includes('email rate limit')) {
-                showToast('Terlalu banyak percobaan. Tunggu beberapa menit lalu coba lagi.');
+                showToast('Terlalu banyak percobaan. Tunggu beberapa menit.');
             } else if (msg.includes('User already registered')) {
                 showToast('Email sudah terdaftar. Coba masuk.');
+            } else if (msg.includes('Email not confirmed')) {
+                showToast('Email belum dikonfirmasi. Cek inbox kamu.');
             } else {
                 showToast(msg);
             }
-            btn.disabled = false;
-            btn.textContent = isLoginMode ? 'Masuk' : 'Daftar';
+            resetBtn();
             return;
         }
 
@@ -240,19 +254,20 @@ async function handleAuthSubmit(e) {
             await loadProfile();
             showApp();
         } else if (!isLoginMode && !result.data.session) {
-            showToast('Akun berhasil dibuat! Sekarang coba masuk.');
+            showToast('Akun berhasil dibuat! Cek email untuk konfirmasi, lalu masuk.');
             isLoginMode = true;
             updateAuthUI();
-            btn.disabled = false;
-            btn.textContent = 'Masuk';
         }
     } catch (err) {
-        showToast('Gagal terhubung ke server. Periksa koneksi internet.');
-        console.error('Auth error:', err);
+        console.error('Auth exception:', err);
+        if (err.message === 'timeout') {
+            showToast('Koneksi lambat. Coba lagi.');
+        } else {
+            showToast('Gagal terhubung. Periksa koneksi internet.');
+        }
+    } finally {
+        resetBtn();
     }
-
-    btn.disabled = false;
-    btn.textContent = isLoginMode ? 'Masuk' : 'Daftar';
 }
 
 async function handleOnboardingSubmit(e) {
