@@ -208,27 +208,47 @@ async function handleAuthSubmit(e) {
     btn.disabled = true;
     btn.textContent = 'Memproses...';
 
-    let result;
-    if (isLoginMode) {
-        result = await supabase.auth.signInWithPassword({ email, password });
-    } else {
-        result = await supabase.auth.signUp({
-            email, password,
-            options: { data: { username: name || email.split('@')[0] } }
-        });
-    }
+    try {
+        let result;
+        if (isLoginMode) {
+            result = await supabase.auth.signInWithPassword({ email, password });
+        } else {
+            result = await supabase.auth.signUp({
+                email, password,
+                options: { data: { username: name || email.split('@')[0] } }
+            });
+        }
 
-    if (result.error) {
-        showToast(result.error.message);
-        btn.disabled = false;
-        btn.textContent = isLoginMode ? 'Masuk' : 'Daftar';
-        return;
-    }
+        if (result.error) {
+            const msg = result.error.message;
+            if (msg.includes('Invalid login credentials')) {
+                showToast('Email atau password salah');
+            } else if (msg.includes('email rate limit')) {
+                showToast('Terlalu banyak percobaan. Tunggu beberapa menit lalu coba lagi.');
+            } else if (msg.includes('User already registered')) {
+                showToast('Email sudah terdaftar. Coba masuk.');
+            } else {
+                showToast(msg);
+            }
+            btn.disabled = false;
+            btn.textContent = isLoginMode ? 'Masuk' : 'Daftar';
+            return;
+        }
 
-    if (isLoginMode && result.data.session) {
-        state.user = result.data.session.user;
-        await loadProfile();
-        showApp();
+        if (isLoginMode && result.data.session) {
+            state.user = result.data.session.user;
+            await loadProfile();
+            showApp();
+        } else if (!isLoginMode && !result.data.session) {
+            showToast('Akun berhasil dibuat! Sekarang coba masuk.');
+            isLoginMode = true;
+            updateAuthUI();
+            btn.disabled = false;
+            btn.textContent = 'Masuk';
+        }
+    } catch (err) {
+        showToast('Gagal terhubung ke server. Periksa koneksi internet.');
+        console.error('Auth error:', err);
     }
 
     btn.disabled = false;

@@ -306,3 +306,53 @@
     transform: scale(1.15);
     background: var(--color-cream-dark);
 }
+
+/* --- Exercise Description --- */
+.exercise-block__desc {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    line-height: 1.4;
+    margin-bottom: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-cream);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--color-warm-gray-lt);
+}
+
+/* --- Warmup Block --- */
+.warmup-block {
+    border-left: 3px solid var(--color-warning) !important;
+}
+
+.warmup-list {
+    padding: 0;
+    margin: var(--space-sm) 0;
+}
+
+.warmup-list li {
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.875rem;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.warmup-list li:last-child {
+    border-bottom: none;
+}
+
+.warmup-list li::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--color-warning);
+    flex-shrink: 0;
+}
+
+.warmup-check {
+    display: inline-flex;
+    vertical-align: middle;
+}

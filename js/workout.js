@@ -71,12 +71,14 @@ async function startWorkout() {
                 state.currentSession.id, exercise.id, cat, i
             );
             if (exData) {
+                const targetMatch = exercise.target_reps?.match(/(\d+)/);
+                const targetVal = targetMatch ? parseInt(targetMatch[1]) : 0;
                 const sets = [];
                 for (let s = 1; s <= 3; s++) {
                     const { data: setData } = await db.addSet(
                         exData.id, s,
-                        exercise.is_hold ? null : 0,
-                        exercise.is_hold ? 0 : null
+                        exercise.is_hold ? null : targetVal,
+                        exercise.is_hold ? targetVal : null
                     );
                     if (setData) sets.push(setData);
                 }
@@ -127,6 +129,28 @@ function renderActiveWorkout() {
             <span class="label">Sesi Aktif</span>
             <span class="workout-header__timer" id="workout-elapsed">0m</span>
         </div>
+
+        <div class="exercise-block warmup-block" style="border-left: 3px solid var(--color-warning)">
+            <div class="exercise-block__header">
+                <div>
+                    <span class="badge badge--neutral">PEMANASAN</span>
+                    <div class="exercise-block__name">Pemanasan (5-10 menit)</div>
+                </div>
+            </div>
+            <div class="exercise-block__desc">Lakukan sebelum mulai latihan inti. Jangan skip!</div>
+            <ul class="warmup-list">
+                <li>Putar pergelangan tangan — 10x tiap arah</li>
+                <li>Putar lengan (arm circle) — 10x depan, 10x belakang</li>
+                <li>Jumping jack — 30 detik</li>
+                <li>Dead hang di pull-up bar — 15-20 detik</li>
+                <li>Squat ringan (bodyweight) — 10x pelan</li>
+            </ul>
+            <div class="set-check warmup-check" id="warmup-done" style="margin-top:12px">
+                ${iconCheck()}
+            </div>
+            <span class="label" style="margin-left:12px;vertical-align:middle" id="warmup-label">Tandai selesai pemanasan</span>
+        </div>
+
         <div id="exercise-list" class="stagger"></div>
         <button class="add-exercise-btn" id="add-exercise-btn">
             ${iconPlus()}
@@ -137,9 +161,31 @@ function renderActiveWorkout() {
         </div>
     `;
 
+    const warmupCheck = $('#warmup-done');
+    const warmupLabel = $('#warmup-label');
+    if (warmupCheck) {
+        const done = sessionStorage.getItem('warmup_done') === 'true';
+        if (done) {
+            warmupCheck.classList.add('checked');
+            if (warmupLabel) warmupLabel.textContent = 'Pemanasan selesai!';
+        }
+        warmupCheck.addEventListener('click', () => {
+            warmupCheck.classList.toggle('checked');
+            const isChecked = warmupCheck.classList.contains('checked');
+            sessionStorage.setItem('warmup_done', isChecked);
+            if (warmupLabel) warmupLabel.textContent = isChecked ? 'Pemanasan selesai!' : 'Tandai selesai pemanasan';
+        });
+    }
+
     renderExercises();
     startElapsedTimer();
     bindWorkoutEvents();
+}
+
+function parseTargetValue(targetReps) {
+    if (!targetReps) return 0;
+    const match = targetReps.match(/(\d+)/);
+    return match ? parseInt(match[1]) : 0;
 }
 
 function renderExercises() {
@@ -149,6 +195,8 @@ function renderExercises() {
     list.innerHTML = sessionExercises.map((ex, idx) => {
         const prog = ex.progression_levels;
         const isHold = prog?.is_hold;
+        const targetVal = parseTargetValue(prog?.target_reps);
+        const targetLabel = prog?.target_reps || '';
 
         return `
             <div class="exercise-block" data-exercise-id="${ex.id}" data-category="${ex.category}">
@@ -157,22 +205,28 @@ function renderExercises() {
                         <span class="tag tag--${ex.category}">${CATEGORY_LABELS[ex.category]}</span>
                         <div class="exercise-block__name">${prog?.exercise_name || 'Exercise'}</div>
                     </div>
+                    <span class="badge badge--terracotta">${targetLabel}</span>
                 </div>
+                ${prog?.description ? `<div class="exercise-block__desc">${prog.description}</div>` : ''}
                 <div class="set-list" data-exercise-entry="${ex.id}">
-                    ${(ex.sets || []).map((set, sIdx) => `
+                    ${(ex.sets || []).map((set, sIdx) => {
+                        const currentVal = isHold
+                            ? (set.hold_seconds || targetVal)
+                            : (set.reps || targetVal);
+                        return `
                         <div class="set-row ${set.completed ? 'completed' : ''}" data-set-id="${set.id}">
                             <span class="set-row__label">Set ${sIdx + 1}</span>
                             <div class="set-row__input-group">
                                 ${isHold
-                                    ? `<input type="number" class="set-reps-input" value="${set.hold_seconds || 0}" min="0" inputmode="numeric" data-type="hold"> <span>detik</span>`
-                                    : `<input type="number" class="set-reps-input" value="${set.reps || 0}" min="0" inputmode="numeric" data-type="reps"> <span>reps</span>`
+                                    ? `<input type="number" class="set-reps-input" value="${currentVal}" min="0" inputmode="numeric" data-type="hold"> <span>detik</span>`
+                                    : `<input type="number" class="set-reps-input" value="${currentVal}" min="0" inputmode="numeric" data-type="reps"> <span>reps</span>`
                                 }
                             </div>
                             <div class="set-check ${set.completed ? 'checked' : ''}" data-set-id="${set.id}">
                                 ${iconCheck()}
                             </div>
                         </div>
-                    `).join('')}
+                    `}).join('')}
                 </div>
             </div>
         `;
@@ -384,12 +438,14 @@ function showExercisePicker() {
             );
 
             if (exData) {
+                const targetMatch = exercise.target_reps?.match(/(\d+)/);
+                const targetVal = targetMatch ? parseInt(targetMatch[1]) : 0;
                 const sets = [];
                 for (let s = 1; s <= 3; s++) {
                     const { data: setData } = await db.addSet(
                         exData.id, s,
-                        exercise.is_hold ? null : 0,
-                        exercise.is_hold ? 0 : null
+                        exercise.is_hold ? null : targetVal,
+                        exercise.is_hold ? targetVal : null
                     );
                     if (setData) sets.push(setData);
                 }
