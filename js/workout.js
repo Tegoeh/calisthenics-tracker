@@ -88,6 +88,32 @@ async function startWorkout() {
         }
     }
 
+    // Add supplementary exercises (e.g. Dead Hang alongside Australian Pull-up)
+    const pullLevel = state.userProgression['pull'] || 1;
+    if (pullLevel >= 2) {
+        const deadHang = getExerciseForLevel('pull', 1);
+        if (deadHang) {
+            const { data: exData } = await db.addExerciseToSession(
+                state.currentSession.id, deadHang.id, 'pull', sessionExercises.length
+            );
+            if (exData) {
+                const targetMatch = deadHang.target_reps?.match(/(\d+)/);
+                const targetVal = targetMatch ? parseInt(targetMatch[1]) : 0;
+                const sets = [];
+                for (let s = 1; s <= 3; s++) {
+                    const { data: setData } = await db.addSet(
+                        exData.id, s,
+                        deadHang.is_hold ? null : targetVal,
+                        deadHang.is_hold ? targetVal : null
+                    );
+                    if (setData) sets.push(setData);
+                }
+                exData.sets = sets;
+                sessionExercises.push(exData);
+            }
+        }
+    }
+
     startElapsedTimer();
     renderActiveWorkout();
 }
