@@ -13,7 +13,7 @@ INSERT INTO progression_levels (category, level, exercise_name, description, tar
 
 -- PULL
 ('pull', 1, 'Dead Hang', 'Gelantung di bar dengan rileks, bahu tidak naik ke telinga. Latih grip.', '3x20s', '3x30s dengan nyaman', true),
-('pull', 2, 'Scapular Pull', 'Gelantung lalu tarik bahu ke bawah dan belakang. Gerakan kecil tapi penting.', '3x8', '3x10 terkontrol', false),
+('pull', 2, 'Australian Pull-up', 'Pasang bar rendah setinggi pinggang di pintu. Badan lurus, tarik dada ke bar. Makin horizontal = makin susah.', '3x8', '3x10 dengan form bagus', false),
 ('pull', 3, 'Negative Pull-up', 'Lompat ke atas bar, turunkan badan sepelan mungkin (3-5 detik).', '3x5', '3x5 dengan descent 5 detik', false),
 ('pull', 4, 'Assisted Pull-up', 'Pull-up dengan bantuan karet resistance band atau kursi.', '3x6', '3x8 dengan bantuan minimal', false),
 ('pull', 5, 'Pull-up', 'Full dead-hang pull-up, dagu melewati bar. The real deal.', '3x6', 'Mastery tercapai', false),
