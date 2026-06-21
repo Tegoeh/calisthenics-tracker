@@ -1,6 +1,3 @@
-# Supabase credentials - NEVER commit real keys
-js/config.js
-
 # Screenshots and temp files
 screenshots/
 *.png
