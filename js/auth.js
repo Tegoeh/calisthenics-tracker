@@ -2,7 +2,7 @@ import { supabase, state, isConfigured } from './app.js';
 import { showToast } from './utils.js';
 
 // ========================================
-// Auth Module - Supabase Auth
+// Auth Module
 // ========================================
 
 const authContainer = document.getElementById('auth-container');
@@ -16,18 +16,56 @@ export async function initAuth() {
         return;
     }
 
-    const { data: { session } } = await supabase.auth.getSession();
+    try {
+        const { data } = await supabase.auth.getSession();
+        const session = data?.session;
 
-    if (session?.user) {
-        state.user = { id: session.user.id };
-        await loadProfile();
-        showApp();
-        bindAuthEvents();
+        if (session) {
+            state.user = session.user;
+            await loadProfile();
+            showApp();
+        } else {
+            showAuth();
+        }
+
+        supabase.auth.onAuthStateChange((_event, session) => {
+            if (session) {
+                state.user = session.user;
+                loadProfile().then(() => showApp());
+            } else {
+                state.user = null;
+                state.profile = null;
+                showAuth();
+            }
+        });
+    } catch (e) {
+        console.warn('Supabase connection failed, showing login screen:', e.message);
+        showAuth();
+    }
+
+    bindAuthEvents();
+}
+
+async function loadProfile() {
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', state.user.id)
+        .single();
+
+    if (error) {
+        console.error('Profile load error:', error);
         return;
     }
 
-    showAuth();
-    bindAuthEvents();
+    state.profile = data;
+
+    if (!data.height_cm && !data.weight_kg) {
+        showOnboarding();
+        return;
+    }
+
+    await loadProgressionData();
 }
 
 async function loadProgressionData() {
@@ -65,28 +103,6 @@ async function loadProgressionData() {
             missing.forEach(c => { state.userProgression[c] = 1; });
         }
     }
-}
-
-async function loadProfile() {
-    const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', state.user.id)
-        .single();
-
-    if (error) {
-        console.error('Profile load error:', error);
-        return;
-    }
-
-    state.profile = data;
-
-    if (!data.height_cm && !data.weight_kg) {
-        showOnboarding();
-        return;
-    }
-
-    await loadProgressionData();
 }
 
 function showAuth() {
@@ -193,58 +209,31 @@ async function handleAuthSubmit(e) {
     btn.disabled = true;
     btn.textContent = 'Memproses...';
 
-    const resetBtn = () => {
+    let result;
+    if (isLoginMode) {
+        result = await supabase.auth.signInWithPassword({ email, password });
+    } else {
+        result = await supabase.auth.signUp({
+            email, password,
+            options: { data: { username: name || email.split('@')[0] } }
+        });
+    }
+
+    if (result.error) {
+        showToast(result.error.message);
         btn.disabled = false;
         btn.textContent = isLoginMode ? 'Masuk' : 'Daftar';
-    };
-
-    try {
-        if (isLoginMode) {
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email,
-                password
-            });
-
-            if (error) {
-                showToast(error.message === 'Invalid login credentials'
-                    ? 'Email atau password salah'
-                    : error.message);
-                resetBtn();
-                return;
-            }
-
-            state.user = { id: data.user.id };
-            await loadProfile();
-            showApp();
-        } else {
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: { username: name || email.split('@')[0] }
-                }
-            });
-
-            if (error) {
-                showToast(error.message);
-                resetBtn();
-                return;
-            }
-
-            if (data.session) {
-                state.user = { id: data.user.id };
-                await loadProfile();
-                showApp();
-            } else {
-                showToast('Cek email kamu untuk verifikasi akun');
-                resetBtn();
-            }
-        }
-    } catch (err) {
-        console.error('Auth exception:', err);
-        showToast('Gagal terhubung. Periksa koneksi internet.');
-        resetBtn();
+        return;
     }
+
+    if (isLoginMode && result.data.session) {
+        state.user = result.data.session.user;
+        await loadProfile();
+        showApp();
+    }
+
+    btn.disabled = false;
+    btn.textContent = isLoginMode ? 'Masuk' : 'Daftar';
 }
 
 async function handleOnboardingSubmit(e) {
