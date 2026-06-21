@@ -71,8 +71,8 @@ async function startWorkout() {
                 state.currentSession.id, exercise.id, cat, i
             );
             if (exData) {
-                const targetMatch = exercise.target_reps?.match(/(\d+)/);
-                const targetVal = targetMatch ? parseInt(targetMatch[1]) : 0;
+                const targetMatches = exercise.target_reps?.match(/(\d+)/g);
+                const targetVal = targetMatches?.length >= 2 ? parseInt(targetMatches[1]) : (targetMatches ? parseInt(targetMatches[0]) : 0);
                 const sets = [];
                 for (let s = 1; s <= 3; s++) {
                     const { data: setData } = await db.addSet(
@@ -97,8 +97,8 @@ async function startWorkout() {
                 state.currentSession.id, deadHang.id, 'pull', sessionExercises.length
             );
             if (exData) {
-                const targetMatch = deadHang.target_reps?.match(/(\d+)/);
-                const targetVal = targetMatch ? parseInt(targetMatch[1]) : 0;
+                const targetMatches = deadHang.target_reps?.match(/(\d+)/g);
+                const targetVal = targetMatches?.length >= 2 ? parseInt(targetMatches[1]) : (targetMatches ? parseInt(targetMatches[0]) : 0);
                 const sets = [];
                 for (let s = 1; s <= 3; s++) {
                     const { data: setData } = await db.addSet(
@@ -210,8 +210,10 @@ function renderActiveWorkout() {
 
 function parseTargetValue(targetReps) {
     if (!targetReps) return 0;
-    const match = targetReps.match(/(\d+)/);
-    return match ? parseInt(match[1]) : 0;
+    const matches = targetReps.match(/(\d+)/g);
+    if (matches && matches.length >= 2) return parseInt(matches[1]);
+    if (matches && matches.length === 1) return parseInt(matches[0]);
+    return 0;
 }
 
 function renderExercises() {
@@ -464,8 +466,8 @@ function showExercisePicker() {
             );
 
             if (exData) {
-                const targetMatch = exercise.target_reps?.match(/(\d+)/);
-                const targetVal = targetMatch ? parseInt(targetMatch[1]) : 0;
+                const targetMatches = exercise.target_reps?.match(/(\d+)/g);
+                const targetVal = targetMatches?.length >= 2 ? parseInt(targetMatches[1]) : (targetMatches ? parseInt(targetMatches[0]) : 0);
                 const sets = [];
                 for (let s = 1; s <= 3; s++) {
                     const { data: setData } = await db.addSet(
