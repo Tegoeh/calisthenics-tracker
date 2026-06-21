@@ -1,7 +1,7 @@
 import { supabase, state, isConfigured } from './app.js';
 
 // ========================================
-// Auth Module
+// Auth Module - Custom auth via app_users table
 // ========================================
 
 const authContainer = document.getElementById('auth-container');
@@ -15,56 +15,31 @@ export async function initAuth() {
         return;
     }
 
-    try {
-        const { data } = await supabase.auth.getSession();
-        const session = data?.session;
+    const saved = localStorage.getItem('cal_user');
+    if (saved) {
+        try {
+            const user = JSON.parse(saved);
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
 
-        if (session) {
-            state.user = session.user;
-            await loadProfile();
-            showApp();
-        } else {
-            showAuth();
-        }
-
-        supabase.auth.onAuthStateChange((_event, session) => {
-            if (session) {
-                state.user = session.user;
-                loadProfile().then(() => showApp());
-            } else {
-                state.user = null;
-                state.profile = null;
-                showAuth();
+            if (profile) {
+                state.user = { id: user.id };
+                state.profile = profile;
+                await loadProgressionData();
+                showApp();
+                bindAuthEvents();
+                return;
             }
-        });
-    } catch (e) {
-        console.warn('Supabase connection failed, showing login screen:', e.message);
-        showAuth();
+        } catch (e) {
+            localStorage.removeItem('cal_user');
+        }
     }
 
+    showAuth();
     bindAuthEvents();
-}
-
-async function loadProfile() {
-    const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', state.user.id)
-        .single();
-
-    if (error) {
-        console.error('Profile load error:', error);
-        return;
-    }
-
-    state.profile = data;
-
-    if (!data.height_cm && !data.weight_kg) {
-        showOnboarding();
-        return;
-    }
-
-    await loadProgressionData();
 }
 
 async function loadProgressionData() {
@@ -102,6 +77,28 @@ async function loadProgressionData() {
             missing.forEach(c => { state.userProgression[c] = 1; });
         }
     }
+}
+
+async function loadProfile() {
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', state.user.id)
+        .single();
+
+    if (error) {
+        console.error('Profile load error:', error);
+        return;
+    }
+
+    state.profile = data;
+
+    if (!data.height_cm && !data.weight_kg) {
+        showOnboarding();
+        return;
+    }
+
+    await loadProgressionData();
 }
 
 function showAuth() {
@@ -208,7 +205,6 @@ async function handleAuthSubmit(e) {
     btn.disabled = true;
     btn.textContent = 'Memproses...';
 
-    const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms));
     const resetBtn = () => {
         btn.disabled = false;
         btn.textContent = isLoginMode ? 'Masuk' : 'Daftar';
@@ -217,55 +213,45 @@ async function handleAuthSubmit(e) {
     try {
         let result;
         if (isLoginMode) {
-            result = await Promise.race([
-                supabase.auth.signInWithPassword({ email, password }),
-                timeout(10000)
-            ]);
+            result = await supabase.rpc('app_login', {
+                p_email: email,
+                p_password: password
+            });
         } else {
-            result = await Promise.race([
-                supabase.auth.signUp({
-                    email, password,
-                    options: { data: { username: name || email.split('@')[0] } }
-                }),
-                timeout(10000)
-            ]);
+            result = await supabase.rpc('app_signup', {
+                p_email: email,
+                p_password: password,
+                p_username: name || email.split('@')[0]
+            });
         }
 
-        if (result.error) {
-            const msg = result.error.message;
-            console.log('Auth error:', msg);
-            if (msg.includes('Invalid login credentials')) {
-                showToast('Email atau password salah');
-            } else if (msg.includes('email rate limit')) {
-                showToast('Terlalu banyak percobaan. Tunggu beberapa menit.');
-            } else if (msg.includes('User already registered')) {
-                showToast('Email sudah terdaftar. Coba masuk.');
-            } else if (msg.includes('Email not confirmed')) {
-                showToast('Email belum dikonfirmasi. Cek inbox kamu.');
-            } else {
-                showToast(msg);
-            }
+        const rpcData = result.data;
+        const rpcError = result.error;
+
+        if (rpcError) {
+            console.log('RPC error:', rpcError.message);
+            showToast(rpcError.message);
             resetBtn();
             return;
         }
 
-        if (isLoginMode && result.data.session) {
-            state.user = result.data.session.user;
+        if (rpcData && rpcData.success) {
+            const user = rpcData.user;
+            state.user = { id: user.id };
+            localStorage.setItem('cal_user', JSON.stringify(user));
+
             await loadProfile();
             showApp();
-        } else if (!isLoginMode && !result.data.session) {
-            showToast('Akun berhasil dibuat! Cek email untuk konfirmasi, lalu masuk.');
-            isLoginMode = true;
-            updateAuthUI();
+        } else if (rpcData && !rpcData.success) {
+            showToast(rpcData.error || 'Terjadi kesalahan');
+            resetBtn();
+        } else {
+            showToast('Respon tidak valid dari server');
+            resetBtn();
         }
     } catch (err) {
         console.error('Auth exception:', err);
-        if (err.message === 'timeout') {
-            showToast('Koneksi lambat. Coba lagi.');
-        } else {
-            showToast('Gagal terhubung. Periksa koneksi internet.');
-        }
-    } finally {
+        showToast('Gagal terhubung. Periksa koneksi internet.');
         resetBtn();
     }
 }
